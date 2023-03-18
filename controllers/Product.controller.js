@@ -1,7 +1,15 @@
 sap.ui.define([
-        "sap/ui/core/mvc/Controller",
-    ], function( Controller ) {
-        "use strict";
+	"sap/ui/core/mvc/Controller",
+	"sap/ui/model/json/JSONModel",  
+	"sap/m/Dialog",
+	"sap/m/Button",
+	"sap/m/library",
+  "sap/ui/core/library",
+	"sap/m/List",
+	"sap/m/StandardListItem",
+	"sap/m/Text"
+], function (Controller, JSONModel, Dialog, Button,mobileLibrary,coreLibrary, List, StandardListItem,Text) {
+	"use strict";
     
         /**
          * @class spinifex.strato.controller.widget.WidgetSettings Controller for Widget Settings view.
@@ -19,11 +27,12 @@ sap.ui.define([
              * @constructs
              */
             onInit: function () {
-                var model = new sap.ui.model.json.JSONModel({
+                var model = new JSONModel({
                 prodname:"",
                 show:true,
                 price:0,
                 qty:0,
+                AlertVisibility:false,
                 Products: [
                           {
                             "ProductID": 1,
@@ -69,22 +78,96 @@ sap.ui.define([
              * This function is called from the generate
              * button
              */
+            onDefaultDialogPress: function (evt,path) {
+
+              var model = this.getView().getModel();
+              var current_products = model.getProperty(path);
+              
+
+              console.log(current_products,evt);
+              var oDialog = new Dialog({
+                type:mobileLibrary.DialogType.Message,
+                title: "Products Information : "+ current_products.ProductName,
+                state:coreLibrary.ValueState.Information,
+                content:[
+                  new sap.m.Label({ text: "Product name : "+current_products.ProductName }),
+                  new sap.m.Label({ text: "Product Quantity : "+current_products.QuantityPerUnit }),
+                  new sap.m.Label({ text: "Product Price : "+current_products.UnitPrice }),
+                  new sap.m.Label({ text: "Product Discontinued : "+current_products.Discontinued }),
+                ],
+                beginButton: new Button({
+                  text: 'Close',
+                  press: function () {
+                    oDialog.close();
+                  }
+                }),
+                afterClose: function() {
+                  oDialog.destroy();
+                }
+              });
+              oDialog.open();
+              // if (!this.oDefaultDialog) {
+              //   this.oDefaultDialog = new Dialog({
+              //     type:mobileLibrary.DialogType.Message,
+              //     title: "Products Information : "+ current_products.ProductName,
+              //     state:coreLibrary.ValueState.Information,
+              //     draggable:true,
+              //     content:[
+              //       new sap.m.Label({ text: "Product name : "+current_products.ProductName }),
+              //       new sap.m.Label({ text: "Product Quantity : "+current_products.QuantityPerUnit }),
+              //       new sap.m.Label({ text: "Product Price : "+current_products.UnitPrice }),
+              //       new sap.m.Label({ text: "Product Discontinued : "+current_products.Discontinued }),
+              //     ]
+              //     ,
+
+              //     // new List({
+              //     //   items: {
+              //     //     path: ""+path,
+              //     //     template: new StandardListItem({
+              //     //       title: "{ProductName}",
+              //     //       counter: "{UnitPrice}"
+              //     //     })
+              //     //   }
+              //     // })
+              //     beginButton: new Button({
+              //       type:  mobileLibrary.ButtonType.Emphasized,
+              //       text: "OK",
+              //       press: function () {
+              //         this.oDefaultDialog.close();
+              //       }.bind(this)
+              //     }),
+              //     endButton: new Button({
+              //       text: "Close",
+              //       press: function () {
+              //         this.oDefaultDialog.close();
+              //       }.bind(this)
+              //     }),
+              //     afterClose: function() {
+              //     }
+              //   });
+        
+              //   // to get access to the controller's model
+              //   this.getView().addDependent(this.oDefaultDialog);
+              // }
+        
+              // this.oDefaultDialog.open();
+            },
+              
             onToggle: function() {
                 var model = this.getView().getModel();
                 var show = model.getProperty("/show");
                 model.setProperty("/show", !show);
 
             },
-            onAddProductToList: function(ctx,oProduct) {
-                var model = this.getView().getModel();
-          
-                var records = model.getProperty("/Products_list");
+            // onAddProductToList: function(ctx,oProduct) {
+            //     var model = this.getView().getModel();
+            //     var records = model.getProperty("/Products_list");
     
-                records.push(oProduct);
+            //     records.push(oProduct);
     
-                model.setProperty("/Products_list", records);
+            //     model.setProperty("/Products_list", records);
 
-            },
+            // },
             onSaveProduct: function() {
                 var model = this.getView().getModel();
                 var current_products = model.getProperty("/Products");
@@ -92,12 +175,14 @@ sap.ui.define([
                 let price = model.getProperty("/price");
                 let qty = model.getProperty("/qty");
                 var discon = false;
+                
                 if(model.getProperty("/prodname").trim() === ""){
+                  model.setProperty("/AlertVisibility",true);
                         return sap.m.MessageToast.show("Product name is Required", {
                                 duration: 1000,                  // default
                                 width: "100%",                   // default
-                                my: "top bottom",             // default
-                                at: "top bottom",             // default
+                                my: "center  bottom",             // default
+                                at: "center  bottom",             // default
                                 of: window,                      // default
                                 offset: "0 0",                   // default
                                 collision: "fit fit",            // default
@@ -134,13 +219,7 @@ sap.ui.define([
                 model.setProperty("/prodname",0);
                 model.setProperty("/price",0);
                 model.setProperty("/qty",0);
-
-                
-    
-                // records.push();
-    
-                // model.setProperty("/Products", [...records]);
             }
         });
-    
+  
     });

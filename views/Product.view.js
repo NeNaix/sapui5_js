@@ -20,7 +20,28 @@ sap.ui.define([
                     title: "PRODUCT",
                     content: [
                         new Label({ text: "Product name :" }),
-                        new Input({ value: "{/prodname}" ,placeholder:"Product Name"}),
+                        new Input({ 
+                            value: "{/prodname}",
+                            placeholder:"Product Name",
+                            valueState: {
+                                parts: ["/AlertVisibility"],
+                                formatter: function(AlertMessageVisibility) {
+                                    console.log('AlertMessageVisibility', AlertMessageVisibility);
+                                    return AlertMessageVisibility
+                                        ? sap.ui.core.ValueState.Error
+                                        : sap.ui.core.ValueState.None
+                                } 
+                            },
+                            valueStateText: {
+                                parts: ["/AlertVisibility"],
+                                formatter: function(AlertMessageVisibility) {
+                                    console.log('AlertMessageVisibility', AlertMessageVisibility);
+                                    return AlertMessageVisibility
+                                        ? "this is reuired field"
+                                        : ''
+                                } 
+                            }
+                        }),
 
                         new Label({ text: "Product price :" }),
                         new Input({ value: "{/price}", type:"Number" ,placeholder:"Product Price"}),
@@ -46,6 +67,7 @@ sap.ui.define([
                                 press: [oController.onToggle, oController]
                             }),
                         new Table({
+                            mode:"SingleSelectMaster",
                             visible: {
                                 path: "/show",
                                 formatter: function(is_visible) {
@@ -60,6 +82,7 @@ sap.ui.define([
                                 new Column({header: new Text({text:"QuantityPerUnit"}) }),
                                 new Column({header: new Text({text:"UnitPrice"}) }),
                                 new Column({header: new Text({text:"Discontinued"}) }),
+                                new Column({header: new Text({text:"More Details"}) }),
                             ],
                             items: {
                                         path:"/Products",
@@ -69,13 +92,11 @@ sap.ui.define([
             
                                         // })
                                         factory: (idx,ctx) =>{
-                                            console.log(ctx);
-
                                             var inputPrice;
                                             var inputQty;
                                             var border;
                                             var data = ctx.getObject()
-                                        //     console.log(ctx)
+                                            console.log(ctx.sPath)
                                             if(data.UnitPrice === 0 ){
                                                 
                                                 inputPrice = new Input({value:data.UnitPrice,type:"Number",placeholder:"Product Price"})
@@ -90,13 +111,17 @@ sap.ui.define([
                                             }
 
                                             return new sap.m.ColumnListItem({
-                                                
                                                 cells:[
                                                     new Text({text:"{ProductID}"}),
                                                     new Text({text:"{ProductName}"}),
                                                     inputQty,
                                                     inputPrice,
-                                                    new Text({text:"{Discontinued}"}) 
+                                                    new Text({text:"{Discontinued}"}),
+                                                    new Button({
+                                                        text: "",
+                                                        icon:"sap-icon://inspect",
+                                                        press: [ctx.sPath,oController.onDefaultDialogPress, oController]
+                                                    }),
                                                 ],highlight:{
                                                         parts:["Discontinued"],
                                                         formatter: function(discon) {
@@ -104,8 +129,9 @@ sap.ui.define([
                                                             }
                                                
 
-                                                }
+                                                },
                                                 
+                                                        
                                             }).addStyleClass("discon")
             
                                         }
@@ -119,54 +145,56 @@ sap.ui.define([
                                             return !is_visible;
                                         }
                                     },
+                            type: "Navigation",
                             items: {
                                 path:"/Products",
-                                template: new sap.m.StandardListItem({
-                                            title:{
-                                                parts:["ProductName"],
-                                                formatter: function(ProductName) {
-                                                        return `Product Name: `+ ProductName;
-                                                },
-                                                
-                                            },
-                                            description:{
-                                                parts:["QuantityPerUnit","UnitPrice"],
-                                                formatter: function(QuantityPerUnit,UnitPrice) {
-                                                                return `Product Price: $${UnitPrice}   Product Quantity: ${QuantityPerUnit}`;
-                                                }
-                                            },
-                                            icon: "sap-icon://chevron-phase-2",
-                                            highlight:{
-                                                parts:["Discontinued"],
-                                                formatter: function(discon) {
-                                                        return discon?sap.ui.core.MessageType.Error:sap.ui.core.MessageType.Success;
-                                                    }
-                                       
-
-                                        }
-            
-                                        })
-                                // factory: (idx,ctx) =>{
-                                //     return new sap.m.StandardListItem({
-                                //         title:{
+                                // template: new sap.m.StandardListItem({
+                                //             title:{
                                 //                 parts:["ProductName"],
                                 //                 formatter: function(ProductName) {
                                 //                         return `Product Name: `+ ProductName;
-                                //                 }
-
-                                //         },
-                                //         description:{
+                                //                 },
+                                                
+                                //             },
+                                //             description:{
                                 //                 parts:["QuantityPerUnit","UnitPrice"],
                                 //                 formatter: function(QuantityPerUnit,UnitPrice) {
-                                //                         return `Product Price: $${UnitPrice}   Product Quantity: ${QuantityPerUnit}`;
+                                //                                 return `Product Price: $${UnitPrice}   Product Quantity: ${QuantityPerUnit}`;
                                 //                 }
+                                //             },
+                                //             icon: "sap-icon://chevron-phase-2",
+                                //             highlight:{
+                                //                 parts:["Discontinued"],
+                                //                 formatter: function(discon) {
+                                //                         return discon?sap.ui.core.MessageType.Error:sap.ui.core.MessageType.Success;
+                                //                     },
+                                //             press: [ctx.sPath,oController.onDefaultDialogPress, oController]
+                                       
+
                                 //         }
-                                //     })
+            
+                                //         })
+                                factory: (idx,ctx) =>{
+                                    return new sap.m.StandardListItem({
+                                        title:{
+                                                parts:["ProductName"],
+                                                formatter: function(ProductName) {
+                                                        return `Product Name: `+ ProductName;
+                                                }
+
+                                        },
+                                        description:{
+                                                parts:["QuantityPerUnit","UnitPrice"],
+                                                formatter: function(QuantityPerUnit,UnitPrice) {
+                                                        return `Product Price: $${UnitPrice}   Product Quantity: ${QuantityPerUnit}`;
+                                                }
+                                        }
+                                    })
     
-                                // }
+                                }
                             },
                             
-                        }),    
+                        }),
                     ]
                 });
     
