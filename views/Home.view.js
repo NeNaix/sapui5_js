@@ -1,8 +1,22 @@
-
 sap.ui.define([
-    "sap/m/Page","sap/m/Label","sap/m/Input","sap/m/Button","sap/m/TextArea",
-    "sap/m/Table","sap/m/Column","sap/m/Text"
-], function( Page,Label,Input,Button,TextArea,Table,Column,Text ) {
+    "sap/m/Page",
+    "sap/m/Label",
+    "sap/m/Input",
+    "sap/m/Button",
+    "sap/m/TextArea",
+    "sap/m/Table",
+    "sap/m/Column",
+    "sap/m/Text"
+], function( 
+    Page,
+    Label,
+    Input,
+    Button,
+    TextArea,
+    Table,
+    Column,
+    Text 
+    ) {
     "use strict";
 
 	var oView = sap.ui.jsview("spinifex.webdemo.views.Home", {

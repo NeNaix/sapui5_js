@@ -7,8 +7,22 @@ sap.ui.define([
   "sap/ui/core/library",
 	"sap/m/List",
 	"sap/m/StandardListItem",
-	"sap/m/Text"
-], function (Controller, JSONModel, Dialog, Button,mobileLibrary,coreLibrary, List, StandardListItem,Text) {
+	"sap/m/Text",
+  "sap/m/Input",
+  "sap/m/FormattedText",
+], function (
+  Controller,
+  JSONModel,
+  Dialog,
+  Button,
+  mobileLibrary,
+  coreLibrary,
+  List,
+  StandardListItem,
+  Text,
+  Input,
+  FormattedText,
+  ) {
 	"use strict";
     
         /**
@@ -28,6 +42,8 @@ sap.ui.define([
              */
             onInit: function () {
                 var model = new JSONModel({
+                first:true,second:true,
+                input1:null,input2:null,opt:"+",answer:0,
                 prodname:"",
                 show:true,
                 price:0,
@@ -78,21 +94,32 @@ sap.ui.define([
              * This function is called from the generate
              * button
              */
+          
+            onSelectedRowItem: function(evt) {
+              
+              var oSelectedItem = oEvent.getSource();
+              var oContext = oSelectedItem.getBindingContext("products");
+              var sPath = oContext.getPath();
+              var oProductDetailPanel = this.byId("productDetailsPanel");
+              console.log(sPath);
+              oProductDetailPanel.bindElement({ path: sPath, model: "Products" });
+              
+            },
             onDefaultDialogPress: function (evt,path) {
 
               var model = this.getView().getModel();
               var current_products = model.getProperty(path);
-              
-
-              console.log(current_products,evt);
+              var pqty;
+              var pprice;
+              console.log("The chosen path :"+path);
               var oDialog = new Dialog({
                 type:mobileLibrary.DialogType.Message,
-                title: "Products Information : "+ current_products.ProductName,
                 state:coreLibrary.ValueState.Information,
+                title: "Products Information : "+ current_products.ProductName,
                 content:[
-                  new sap.m.Label({ text: "Product name : "+current_products.ProductName }),
-                  new sap.m.Label({ text: "Product Quantity : "+current_products.QuantityPerUnit }),
-                  new sap.m.Label({ text: "Product Price : "+current_products.UnitPrice }),
+                  new sap.m.Label({ text: `{${path}/ProductName}` }),
+                  new Input({value:`{${path}/UnitPrice}`,type:"Number",placeholder:"Product Price"}),
+                  new Input({value:`{${path}/QuantityPerUnit}`,placeholder:"Product QTY"}),
                   new sap.m.Label({ text: "Product Discontinued : "+current_products.Discontinued }),
                 ],
                 beginButton: new Button({
@@ -105,52 +132,9 @@ sap.ui.define([
                   oDialog.destroy();
                 }
               });
-              oDialog.open();
-              // if (!this.oDefaultDialog) {
-              //   this.oDefaultDialog = new Dialog({
-              //     type:mobileLibrary.DialogType.Message,
-              //     title: "Products Information : "+ current_products.ProductName,
-              //     state:coreLibrary.ValueState.Information,
-              //     draggable:true,
-              //     content:[
-              //       new sap.m.Label({ text: "Product name : "+current_products.ProductName }),
-              //       new sap.m.Label({ text: "Product Quantity : "+current_products.QuantityPerUnit }),
-              //       new sap.m.Label({ text: "Product Price : "+current_products.UnitPrice }),
-              //       new sap.m.Label({ text: "Product Discontinued : "+current_products.Discontinued }),
-              //     ]
-              //     ,
 
-              //     // new List({
-              //     //   items: {
-              //     //     path: ""+path,
-              //     //     template: new StandardListItem({
-              //     //       title: "{ProductName}",
-              //     //       counter: "{UnitPrice}"
-              //     //     })
-              //     //   }
-              //     // })
-              //     beginButton: new Button({
-              //       type:  mobileLibrary.ButtonType.Emphasized,
-              //       text: "OK",
-              //       press: function () {
-              //         this.oDefaultDialog.close();
-              //       }.bind(this)
-              //     }),
-              //     endButton: new Button({
-              //       text: "Close",
-              //       press: function () {
-              //         this.oDefaultDialog.close();
-              //       }.bind(this)
-              //     }),
-              //     afterClose: function() {
-              //     }
-              //   });
-        
-              //   // to get access to the controller's model
-              //   this.getView().addDependent(this.oDefaultDialog);
-              // }
-        
-              // this.oDefaultDialog.open();
+              oDialog.setModel(model);
+              oDialog.open();
             },
               
             onToggle: function() {
@@ -159,15 +143,43 @@ sap.ui.define([
                 model.setProperty("/show", !show);
 
             },
-            // onAddProductToList: function(ctx,oProduct) {
-            //     var model = this.getView().getModel();
-            //     var records = model.getProperty("/Products_list");
+            onchangeEvent: function(ctx) {
+                var model = this.getView().getModel();
+                var first = +model.getProperty("/input1");
+                var second = +model.getProperty("/input2");
+                var opt = model.getProperty("/opt");
+                
+                first < 0 ? model.setProperty("/first",true):model.setProperty("/first",false);
+                second < 0 ? model.setProperty("/second",true):model.setProperty("/second",false);
+                if (model.getProperty("/first")|| model.getProperty("/second")) {
+                    return;
+                }
+                
+                switch(opt){
+                    case "+":
+                        model.setProperty("/answer",first+second);
+                        break;
+                    case "-":
+                        model.setProperty("/answer",first-second);
+                        break;
+                    case "*":
+                        model.setProperty("/answer",first*second);
+                        break;
+                    case "/":
+                        model.setProperty("/answer",first/second);
+                        break;
+                    case "^":
+                        model.setProperty("/answer",first**second);
+                        break;
+                    case "%":
+                        model.setProperty("/answer",first%second);
+                        break;
+                }
+                  
+                
     
-            //     records.push(oProduct);
-    
-            //     model.setProperty("/Products_list", records);
 
-            // },
+            },
             onSaveProduct: function() {
                 var model = this.getView().getModel();
                 var current_products = model.getProperty("/Products");

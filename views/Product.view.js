@@ -1,11 +1,9 @@
-
 sap.ui.define([
         "sap/m/Page","sap/m/Label","sap/m/Input","sap/m/Button","sap/m/TextArea",
-        "sap/m/Table","sap/m/Column","sap/m/Text"
-    ], function( Page,Label,Input,Button,TextArea,Table,Column,Text ) {
+        "sap/m/Table","sap/m/Column","sap/m/Text","../controls/CustomCal"
+    ], function( Page,Label,Input,Button,TextArea,Table,Column,Text,cuinput ) {
         "use strict";
-    
-            var oView = sap.ui.jsview("spinifex.webdemo.views.Product", {
+        var oView = sap.ui.jsview("spinifex.webdemo.views.Product", {
                     /**
              * Specifies the Controller belonging to this View.
                      * In the case that it is not implemented, or that "null" is
@@ -19,36 +17,51 @@ sap.ui.define([
                 return new Page({
                     title: "PRODUCT",
                     content: [
-                        new Label({ text: "Product name :" }),
-                        new Input({ 
-                            value: "{/prodname}",
-                            placeholder:"Product Name",
-                            valueState: {
-                                parts: ["/AlertVisibility"],
-                                formatter: function(AlertMessageVisibility) {
-                                    console.log('AlertMessageVisibility', AlertMessageVisibility);
-                                    return AlertMessageVisibility
-                                        ? sap.ui.core.ValueState.Error
-                                        : sap.ui.core.ValueState.None
-                                } 
-                            },
-                            valueStateText: {
-                                parts: ["/AlertVisibility"],
-                                formatter: function(AlertMessageVisibility) {
-                                    console.log('AlertMessageVisibility', AlertMessageVisibility);
-                                    return AlertMessageVisibility
-                                        ? "this is reuired field"
-                                        : ''
-                                } 
-                            }
-                        }),
+                        // new Label({ text: "Product name :" }),
+                        // new Input("",{ 
+                        //     value: "{/prodname}",
+                        //     placeholder:"Product Name",
+                        //     valueState: {
+                        //         parts: ["/AlertVisibility"],
+                        //         formatter: function(AlertMessageVisibility) {
+                        //             console.log('AlertMessageVisibility', AlertMessageVisibility);
+                        //             return AlertMessageVisibility
+                        //                 ? sap.ui.core.ValueState.Error
+                        //                 : sap.ui.core.ValueState.None
+                        //         } 
+                        //     },
+                        //     valueStateText: {
+                        //         parts: ["/AlertVisibility"],
+                        //         formatter: function(AlertMessageVisibility) {
+                        //             console.log('AlertMessageVisibility', AlertMessageVisibility);
+                        //             return AlertMessageVisibility
+                        //                 ? "this is reuired field"
+                        //                 : ''
+                        //         } 
+                        //     }
+                        // }),
 
-                        new Label({ text: "Product price :" }),
-                        new Input({ value: "{/price}", type:"Number" ,placeholder:"Product Price"}),
+                        // new Label({ text: "Product price :" }),
+                        // new Input({ value: "{/price}", type:"Number" ,placeholder:"Product Price"}),
+
+                        // new Label({ text: "Product quantity:" , description:"Product quantity"}),
+                        // new Input({ value: "{/qty}", type:"Number" ,placeholder:"Product Quantity"}),
 
                         new Label({ text: "Product quantity:" , description:"Product quantity"}),
-                        new Input({ value: "{/qty}", type:"Number" ,placeholder:"Product Quantity"}),
+                        new cuinput({
+                            Input_first_value:"{/input1}",
+                            Input_second_value:"{/input2}",
+                            Operator:"{/opt}",
+                            change:[oController.onchangeEvent,oController]
+                        }),
                         
+                        new Input({ value: {
+                            parts:["/answer"],
+                            formatter: function(ans) {
+
+                                return (""+ans) === "NaN"?"Not Divisible by nothing or Zero":"Answer : " + ans ;
+                            }
+                        } ,editable:false}),    
                         new Button({
                             text: "Add",
                             icon:"sap-icon://add",
@@ -79,8 +92,8 @@ sap.ui.define([
                             columns: [
                                 new Column({ header: new Text({text:"ProductID"})  }),
                                 new Column({ header: new Text({text:"ProductName"}) }),
-                                new Column({header: new Text({text:"QuantityPerUnit"}) }),
                                 new Column({header: new Text({text:"UnitPrice"}) }),
+                                new Column({header: new Text({text:"QuantityPerUnit"}) }),
                                 new Column({header: new Text({text:"Discontinued"}) }),
                                 new Column({header: new Text({text:"More Details"}) }),
                             ],
@@ -94,28 +107,15 @@ sap.ui.define([
                                         factory: (idx,ctx) =>{
                                             var inputPrice;
                                             var inputQty;
-                                            var border;
                                             var data = ctx.getObject()
-                                            console.log(ctx.sPath)
-                                            if(data.UnitPrice === 0 ){
-                                                
-                                                inputPrice = new Input({value:data.UnitPrice,type:"Number",placeholder:"Product Price"})
-                                            }else{
-                                                inputPrice = new Text({text:"{UnitPrice}" });
-                                            }
-
-                                            if(data.QuantityPerUnit === 0 ){
-                                                inputQty = new Input({value:data.QuantityPerUnit,type:"Number",placeholder:"Product Quantity"})
-                                            }else{
-                                                inputQty = new Text({text:"{QuantityPerUnit}"});
-                                            }
-
-                                            return new sap.m.ColumnListItem({
+                                            console.log(ctx.sPath);
+                                            var row = new sap.m.ColumnListItem({
+                            
                                                 cells:[
                                                     new Text({text:"{ProductID}"}),
                                                     new Text({text:"{ProductName}"}),
-                                                    inputQty,
-                                                    inputPrice,
+                                                    new Text({text:"{UnitPrice}" }),
+                                                    new Text({text:"{QuantityPerUnit}"}),
                                                     new Text({text:"{Discontinued}"}),
                                                     new Button({
                                                         text: "",
@@ -127,13 +127,12 @@ sap.ui.define([
                                                         formatter: function(discon) {
                                                                 return discon?sap.ui.core.MessageType.Error:sap.ui.core.MessageType.Success;
                                                             }
-                                               
-
                                                 },
-                                                
+                                                // press: [ctx.sPath,oController.onDefaultDialogPress, oController]
                                                         
-                                            }).addStyleClass("discon")
-            
+                                            }).addStyleClass("table-success")
+
+                                            return row;
                                         }
                                     }
                         }),
@@ -145,10 +144,11 @@ sap.ui.define([
                                             return !is_visible;
                                         }
                                     },
-                            type: "Navigation",
+                            
                             items: {
                                 path:"/Products",
-                                // template: new sap.m.StandardListItem({
+                                // template: new sap.m.ColumnListItem({
+                                //             type: "Active",
                                 //             title:{
                                 //                 parts:["ProductName"],
                                 //                 formatter: function(ProductName) {
@@ -168,7 +168,7 @@ sap.ui.define([
                                 //                 formatter: function(discon) {
                                 //                         return discon?sap.ui.core.MessageType.Error:sap.ui.core.MessageType.Success;
                                 //                     },
-                                //             press: [ctx.sPath,oController.onDefaultDialogPress, oController]
+                                //             press: [oController.onSelectedRowItem, oController]
                                        
 
                                 //         }

@@ -1,24 +1,4 @@
-
-#__page1-cont{
-        display: block;
-        text-align: center;
-
+.aa{
+        border: solid red 2px;
+        color:pink;
 }
-#__page0-cont{
-        display: block;
-        text-align: center;
-        /* background-image: url(a.gif);
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-size: cover; */
-}
-#__page0-cont input{
-        
-        text-align: center;
-        width: 50%;
-}
-.discon{
-        background-color: red;
-}
-
-
